@@ -14,6 +14,7 @@ struct iw_info {
 };
 
 struct iw_info *get_iw_info(void);
+int change_iw_mac_addr(char *);
 void clear_iw_list(struct iw_info *);
 
 #endif

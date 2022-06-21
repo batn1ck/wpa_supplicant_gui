@@ -3,9 +3,12 @@
 #include "interfaces.h"
 #include "iw_combobox.h"
 
+extern char *selected_iw;
+
 void combo_iw_entry(GtkEntry *entry_if)
 {
-    printf("%s\n", gtk_entry_get_text(entry_if));
+    selected_iw = (char *) malloc(IFNAMSIZ);
+    snprintf(selected_iw, IFNAMSIZ, "%s", gtk_entry_get_text(entry_if));
 }
 
 GtkWidget *combo_iw_show_interfaces(GtkWidget *combo)

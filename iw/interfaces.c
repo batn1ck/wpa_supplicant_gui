@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,11 +7,15 @@
 #include <error.h>
 #include <errno.h>
 #include <ifaddrs.h>
+#include <net/if.h>
+#include <net/if_arp.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <linux/wireless.h>
 #include "interfaces.h"
+
+char *selected_iw = NULL;
 
 static bool check_wireless(const char *ifname, char *protocol)
 {
@@ -111,4 +116,32 @@ void clear_iw_list(struct iw_info *iw_list)
         iw_list = iw_list->iw_next;
         free(temp);
     }
+}
+
+int change_iw_mac_addr(char *if_name)
+{
+    struct ifreq ifr;
+    int fd;
+
+    if ( !if_name )
+        return 1;
+
+    if ( (fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 )
+        return errno;
+
+    srand(time(NULL));
+
+    strncpy(ifr.ifr_name, if_name, IFNAMSIZ);
+    ifr.ifr_hwaddr.sa_data[0] = (unsigned char) rand();
+    ifr.ifr_hwaddr.sa_data[1] = (unsigned char) rand();
+    ifr.ifr_hwaddr.sa_data[2] = (unsigned char) rand();
+    ifr.ifr_hwaddr.sa_data[3] = (unsigned char) rand();
+    ifr.ifr_hwaddr.sa_data[4] = (unsigned char) rand();
+    ifr.ifr_hwaddr.sa_data[5] = (unsigned char) rand();
+    ifr.ifr_hwaddr.sa_family = ARPHRD_ETHER;
+
+    if ( ioctl(fd, SIOCSIFHWADDR, &ifr) < 0 )
+        return errno;
+
+    return 0;
 }
