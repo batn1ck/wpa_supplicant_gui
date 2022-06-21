@@ -118,6 +118,30 @@ void clear_iw_list(struct iw_info *iw_list)
     }
 }
 
+int get_iw_mac_addr(char *mac_addr_str)
+{
+    if ( !mac_addr_str || !selected_iw )
+        return 1;
+
+    struct ifreq ifr;
+    unsigned char mac_addr[MAC_ADDR_LEN];
+    int fd;
+
+    if ( (fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 )
+        return errno;
+
+    ifr.ifr_addr.sa_family = AF_INET;
+    strncpy(ifr.ifr_name, selected_iw, IFNAMSIZ);
+    ioctl(fd, SIOCGIFHWADDR, &ifr);
+    memcpy(mac_addr, (unsigned char *) ifr.ifr_hwaddr.sa_data, MAC_ADDR_LEN);
+    snprintf(mac_addr_str, MAC_ADDR_STR_LEN,
+             "(%.2x:%.2x:%.2x:%.2x:%.2x:%.2x)", 
+             mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]
+    );
+
+    return 0;
+}
+
 int change_iw_mac_addr(char *if_name)
 {
     struct ifreq ifr;

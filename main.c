@@ -8,6 +8,7 @@
 #include "iw/data_structure.h"
 #include "iw/iw_combobox.h"
 #include "iw/iw_mac_label.h"
+#include "iw/iw_mac_button.h"
 
 extern char *selected_iw;
 
@@ -25,6 +26,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_window_set_title(GTK_WINDOW(window), "Wpa_supplicant");
     gtk_builder_connect_signals(builder, NULL);
     g_signal_connect(combo, "changed", G_CALLBACK(iw_mac_label_show), builder);
+    g_signal_connect(combo, "changed", G_CALLBACK(iw_mac_random_button_show), builder);
 
     //choose = GTK_WIDGET(gtk_builder_get_object(builder, "wpa_conf_select"));
 
@@ -51,7 +53,9 @@ main (int   argc,
   g_object_unref (app);
 
   files_paths_free();
-  free(selected_iw);
+
+  if ( selected_iw )
+    free(selected_iw);
 
   return status;
 }
