@@ -135,7 +135,7 @@ int get_iw_mac_addr(char *mac_addr_str)
     ioctl(fd, SIOCGIFHWADDR, &ifr);
     memcpy(mac_addr, (unsigned char *) ifr.ifr_hwaddr.sa_data, MAC_ADDR_LEN);
     snprintf(mac_addr_str, MAC_ADDR_STR_LEN,
-             "(%.2x:%.2x:%.2x:%.2x:%.2x:%.2x)", 
+             "%.2x:%.2x:%.2x:%.2x:%.2x:%.2x", 
              mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]
     );
 
@@ -145,6 +145,7 @@ int get_iw_mac_addr(char *mac_addr_str)
 int change_iw_mac_addr(char *if_name)
 {
     struct ifreq ifr;
+    short backup_flags;
     int fd;
 
     if ( !if_name )
@@ -156,15 +157,40 @@ int change_iw_mac_addr(char *if_name)
     srand(time(NULL));
 
     strncpy(ifr.ifr_name, if_name, IFNAMSIZ);
-    ifr.ifr_hwaddr.sa_data[0] = (unsigned char) rand();
-    ifr.ifr_hwaddr.sa_data[1] = (unsigned char) rand();
-    ifr.ifr_hwaddr.sa_data[2] = (unsigned char) rand();
-    ifr.ifr_hwaddr.sa_data[3] = (unsigned char) rand();
-    ifr.ifr_hwaddr.sa_data[4] = (unsigned char) rand();
-    ifr.ifr_hwaddr.sa_data[5] = (unsigned char) rand();
+
+    if ( ioctl(fd, SIOCGIFFLAGS, &ifr) < 0 )
+        return errno;
+
+    backup_flags = ifr.ifr_flags;
+    ifr.ifr_flags &= ~IFF_UP;
+
+    if ( ioctl(fd, SIOCSIFFLAGS, &ifr) < 0 )
+        return errno;
+
+    ifr.ifr_hwaddr.sa_data[0] = rand() % 256;
+    ifr.ifr_hwaddr.sa_data[1] = rand() % 256;
+    ifr.ifr_hwaddr.sa_data[2] = rand() % 256;
+    ifr.ifr_hwaddr.sa_data[3] = rand() % 256;
+    ifr.ifr_hwaddr.sa_data[4] = rand() % 256;
+    ifr.ifr_hwaddr.sa_data[5] = rand() % 256;
     ifr.ifr_hwaddr.sa_family = ARPHRD_ETHER;
 
-    if ( ioctl(fd, SIOCSIFHWADDR, &ifr) < 0 )
+    if ( ioctl(fd, SIOCSIFHWADDR, &ifr) < 0 ) {
+        fprintf(stderr, "ioctl: %s: %.2x:%.2x:%.2x:%.2x:%.2x:%.2x\n", strerror(errno),
+    ifr.ifr_hwaddr.sa_data[0],
+    ifr.ifr_hwaddr.sa_data[1],
+    ifr.ifr_hwaddr.sa_data[2],
+    ifr.ifr_hwaddr.sa_data[3],
+    ifr.ifr_hwaddr.sa_data[4],
+    ifr.ifr_hwaddr.sa_data[5]
+                );
+        return errno;
+    }
+
+    backup_flags |= IFF_UP;
+    ifr.ifr_flags = backup_flags;
+
+    if ( ioctl(fd, SIOCSIFFLAGS, &ifr) < 0 )
         return errno;
 
     return 0;

@@ -2,7 +2,7 @@
 #define _NET_INTERFACES
 
 #define MAC_ADDR_LEN 6
-#define MAC_ADDR_STR_LEN MAC_ADDR_LEN*2 + (MAC_ADDR_LEN-1) + 3
+#define MAC_ADDR_STR_LEN MAC_ADDR_LEN*2 + (MAC_ADDR_LEN-1) + 1
 
 #ifndef IFNAMSIZ
     #define IFNAMSIZ 16

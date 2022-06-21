@@ -13,7 +13,7 @@ compile_iw:
 compile_wpa:
 	$(CC) -c $(WPA_PATH)files_job.c -o files_job.o $(LIBS_FLAGS) $(CC_FLAGS)
 
-compile:
+compile: compile_iw compile_wpa
 	$(CC) *.o main.c -o main $(LIBS_FLAGS) $(CC_FLAGS)
 
 run:

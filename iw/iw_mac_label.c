@@ -5,7 +5,6 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <linux/wireless.h>
-#include "data_structure.h"
 #include "interfaces.h"
 #include "iw_mac_label.h"
 
@@ -17,25 +16,22 @@ void iw_mac_label_show(GtkWidget *widget, GtkBuilder *builder)
         return;
 
     GtkWidget *mac_label;
-    int fd;
-    struct ifreq ifr;
-    unsigned char mac_addr[MAC_ADDR_LEN];
+    int alpha_offset; 
+    size_t i, mac_string_len;
     char mac_addr_str[MAC_ADDR_STR_LEN];
 
     if ( !selected_iw )
         return;
 
-    if ( (fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 )
+    if ( get_iw_mac_addr(mac_addr_str) != 0 )
         return;
 
-    ifr.ifr_addr.sa_family = AF_INET;
-    strncpy(ifr.ifr_name, selected_iw, IFNAMSIZ);
-    ioctl(fd, SIOCGIFHWADDR, &ifr);
-    memcpy(mac_addr, (unsigned char *) ifr.ifr_hwaddr.sa_data, MAC_ADDR_LEN);
-    snprintf(mac_addr_str, MAC_ADDR_STR_LEN,
-             "(%.2x:%.2x:%.2x:%.2x:%.2x:%.2x)", 
-             mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]
-    );
+    mac_string_len = strlen(mac_addr_str);
+    alpha_offset = 'a' - 'A';
+
+    for (i = 0; i < mac_string_len; i++)
+        if ( mac_addr_str[i] >= 'a' && mac_addr_str[i] <= 'f' )
+            mac_addr_str[i] -= alpha_offset;
 
     mac_label = GTK_WIDGET(gtk_builder_get_object(builder, "mac_addr_label"));
     gtk_label_set_text(GTK_LABEL(mac_label), (const char *) mac_addr_str);
