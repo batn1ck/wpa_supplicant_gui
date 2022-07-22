@@ -2,24 +2,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <semaphore.h>
 #include <unistd.h>
 #include <errno.h>
 #include "wpa_supplicant/files_job.h"
+#include "wpa_supplicant/text_log.h"
 #include "iw/data_structure.h"
 #include "iw/iw_combobox.h"
 #include "iw/iw_mac_label.h"
 #include "iw/iw_mac_button.h"
 
 extern char *selected_iw;
+extern sem_t wpa_supplicant_log_sem;
 
 static void activate(GtkApplication *app, gpointer user_data)
 {
     GtkBuilder *builder;
     GtkWidget *window, *combo;
+    GtkWidget *log_wpa_supp, *wpa_button_start, *wpa_button_stop;
 
     builder = gtk_builder_new_from_file("gui.ui");
+
     window = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
     combo = GTK_WIDGET(gtk_builder_get_object(builder, "interfaces_combo"));
+    log_wpa_supp = GTK_WIDGET(gtk_builder_get_object(builder, "wpa_supplicant_text_log"));
+    wpa_button_start = GTK_WIDGET(gtk_builder_get_object(builder, "wpa_supplicant_start"));
+    wpa_button_stop = GTK_WIDGET(gtk_builder_get_object(builder, "wpa_supplicant_stop"));
 
     combo_iw_show_interfaces(combo);
 
@@ -27,6 +35,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_builder_connect_signals(builder, NULL);
     g_signal_connect(combo, "changed", G_CALLBACK(iw_mac_label_show), builder);
     g_signal_connect(combo, "changed", G_CALLBACK(iw_mac_random_button_show), builder);
+    g_signal_connect(wpa_button_start, "clicked", G_CALLBACK(wpa_log_widget_enable), log_wpa_supp);
 
     //choose = GTK_WIDGET(gtk_builder_get_object(builder, "wpa_conf_select"));
 

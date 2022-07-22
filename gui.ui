@@ -171,6 +171,32 @@
                     <property name="y">372</property>
                   </packing>
                 </child>
+                <child>
+                  <object class="GtkScrolledWindow">
+                    <property name="width-request">698</property>
+                    <property name="height-request">364</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="shadow-type">in</property>
+                    <child>
+                      <object class="GtkViewport">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <child>
+                          <object class="GtkTextView" id="wpa_supplicant_text_log">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="editable">False</property>
+                            <property name="cursor-visible">False</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="y">6</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="name">Wpa_supplicant_page</property>
