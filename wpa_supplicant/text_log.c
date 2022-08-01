@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <semaphore.h>
 #include <pthread.h>
 #include <gtk/gtk.h>
 #include <sys/wait.h>
@@ -33,7 +32,7 @@ static void *read_wpa_fd_out_thread(void *arg)
         return NULL;
 
     text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text));
-    text_view = gtk_text_view_new_with_buffer(text_buffer);
+    //text_view = gtk_text_view_new_with_buffer(text_buffer);
     wpa_supplicant_pid = wpa_supplicant_start(args, &wpa_out_fd);
 
     if ( wpa_supplicant_pid < 0 )
@@ -56,4 +55,11 @@ static void *read_wpa_fd_out_thread(void *arg)
 void wpa_log_widget_enable(GtkWidget *widget, GtkWidget *text)
 {
     pthread_create(&wpa_read_tid, NULL, read_wpa_fd_out_thread, (void *)text);
+}
+
+void wpa_log_clear(GtkWidget *widget, GtkWidget *text_widget)
+{
+    GtkTextBuffer *text_buffer;
+    text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_widget));
+    gtk_text_buffer_set_text(text_buffer, (const gchar *) "\0", (gint) -1);
 }

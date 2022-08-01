@@ -135,7 +135,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton">
+                  <object class="GtkButton" id="wpa_supplicant_log_clear">
                     <property name="label" translatable="yes">Clear log</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
