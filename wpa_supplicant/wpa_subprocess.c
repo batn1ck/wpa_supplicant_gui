@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <error.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <sys/wait.h>
 #include "wpa_subprocess.h"
 
@@ -33,7 +34,14 @@ pid_t wpa_supplicant_start(char **wpa_supplicant_argv, int *out_fd)
              exit(EXIT_FAILURE);
         
          execv("/usr/bin/wpa_supplicant", wpa_supplicant_argv);
+     default:
+         close(wpa_supplicant_fds[1]);
     }
 
     return wpa_supplicant_pid;
+}
+
+int wpa_supplicant_stop(pid_t wpa_supplicant_pid)
+{
+    return kill(wpa_supplicant_pid, SIGQUIT);
 }

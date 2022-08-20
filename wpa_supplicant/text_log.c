@@ -26,7 +26,7 @@ static void *read_wpa_fd_out_thread(void *arg)
     GtkTextView *text_view;
     int wpa_out_fd, n_read_wpa_pid;
     char buf[BUFSIZ+1];
-    char *args[] = {"wpa_supplicant", NULL};
+    char *args[] = {"wpa_supplicant", "-i", "wlp3s0", "-c", "1.wpa", NULL};
 
     if ( pthread_mutex_trylock(&wpa_thread_mutex) != 0 )
         return NULL;
@@ -49,12 +49,19 @@ static void *read_wpa_fd_out_thread(void *arg)
         //printf("%s", buf);
     }
 
+    close(wpa_out_fd);
     return NULL;
 }
 
 void wpa_log_widget_enable(GtkWidget *widget, GtkWidget *text)
 {
     pthread_create(&wpa_read_tid, NULL, read_wpa_fd_out_thread, (void *)text);
+}
+
+void wpa_log_widget_disable(GtkWidget *widget, GtkWidget *text)
+{
+    if ( wpa_supplicant_pid )
+        wpa_supplicant_stop(wpa_supplicant_pid);
 }
 
 void wpa_log_clear(GtkWidget *widget, GtkWidget *text_widget)
