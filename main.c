@@ -16,6 +16,17 @@
 extern char *selected_iw;
 extern pid_t wpa_supplicant_pid;
 
+void close_app(GtkWidget *widget)
+{
+    files_paths_free();
+
+    if ( selected_iw )
+        free(selected_iw);
+
+    if ( wpa_supplicant_pid > 0 )
+        wpa_supplicant_stop(wpa_supplicant_pid);
+}
+
 static void activate(GtkApplication *app, gpointer user_data)
 {
     GtkBuilder *builder;
@@ -35,10 +46,11 @@ static void activate(GtkApplication *app, gpointer user_data)
 
     gtk_window_set_title(GTK_WINDOW(window), "Wpa_supplicant");
     gtk_builder_connect_signals(builder, NULL);
+    g_signal_connect(window, "destroy", G_CALLBACK(close_app), NULL);
     g_signal_connect(combo, "changed", G_CALLBACK(iw_mac_label_show), builder);
     g_signal_connect(combo, "changed", G_CALLBACK(iw_mac_random_button_show), builder);
     g_signal_connect(wpa_button_start, "clicked", G_CALLBACK(wpa_log_widget_enable), log_wpa_supp);
-    //g_signal_connect(wpa_button_stop, "clicked", G_CALLBACK(wpa_log_widget_disable), );
+    g_signal_connect(wpa_button_stop, "clicked", G_CALLBACK(wpa_log_widget_disable), NULL);
     g_signal_connect(wpa_button_log_clear, "clicked", G_CALLBACK(wpa_log_clear), log_wpa_supp);
 
     //choose = GTK_WIDGET(gtk_builder_get_object(builder, "wpa_conf_select"));
@@ -64,14 +76,6 @@ main (int   argc,
 
   int status = g_application_run (G_APPLICATION (app), argc, argv);
   g_object_unref (app);
-
-  files_paths_free();
-
-  if ( selected_iw )
-    free(selected_iw);
-
-  if ( wpa_supplicant_pid > 0 )
-    wpa_supplicant_stop(wpa_supplicant_pid);
 
   return status;
 }

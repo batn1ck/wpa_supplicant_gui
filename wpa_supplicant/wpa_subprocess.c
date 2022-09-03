@@ -43,5 +43,5 @@ pid_t wpa_supplicant_start(char **wpa_supplicant_argv, int *out_fd)
 
 int wpa_supplicant_stop(pid_t wpa_supplicant_pid)
 {
-    return kill(wpa_supplicant_pid, SIGQUIT);
+    return kill(wpa_supplicant_pid, SIGINT);
 }

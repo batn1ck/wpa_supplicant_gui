@@ -13,6 +13,7 @@ static pthread_t wpa_read_tid, wpa_waitpid_tid;
 pid_t wpa_supplicant_pid;
 
 extern files_paths *files;
+extern char *selected_iw;
 
 static void *wait_pid_thread(void *arg)
 {
@@ -30,11 +31,15 @@ static void *read_wpa_fd_out_thread(void *arg)
     int wpa_out_fd, n_read_wpa_pid;
     char buf[BUFSIZ+1];
 
+    if ( !selected_iw )
+        return NULL;
+
     if ( !files || !files->wpa_conf_file_path )
         return NULL;
 
-    printf("%s\n", files->wpa_conf_file_path);
-    char *args[] = {"wpa_supplicant", "-i", "wlp3s0", "-c", files->wpa_conf_file_path, NULL};
+    //printf("Selected iw: %s\n", selected_iw);
+    //printf("%s\n", files->wpa_conf_file_path);
+    char *args[] = {"wpa_supplicant", "-i", selected_iw, "-c", files->wpa_conf_file_path, NULL};
 
     if ( pthread_mutex_trylock(&wpa_thread_mutex) != 0 )
         return NULL;
@@ -66,7 +71,7 @@ void wpa_log_widget_enable(GtkWidget *widget, GtkWidget *text)
     pthread_create(&wpa_read_tid, NULL, read_wpa_fd_out_thread, (void *)text);
 }
 
-void wpa_log_widget_disable(GtkWidget *widget, GtkWidget *text)
+void wpa_log_widget_disable(GtkWidget *widget)
 {
     if ( wpa_supplicant_pid )
         wpa_supplicant_stop(wpa_supplicant_pid);

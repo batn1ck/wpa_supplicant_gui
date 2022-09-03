@@ -21,6 +21,9 @@ compile: compile_iw compile_wpa
 run:
 	./main
 
+run_sudo:
+	gksudo ./main
+
 default: compile_iw compile_wpa compile
 
 build: default run
