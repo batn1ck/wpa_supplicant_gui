@@ -1,8 +1,6 @@
 #ifndef _FILES_JOB
 #define _FILES_JOB
 
-#include <gtk/gtk.h>
-
 typedef struct {
     char *log_wpa_supp_path;
     char *log_scan_ap_path;

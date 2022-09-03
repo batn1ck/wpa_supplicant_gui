@@ -2,9 +2,10 @@
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
+#include <gtk/gtk.h>
 #include "files_job.h"
 
-static files_paths *files = NULL;
+files_paths *files = NULL;
 
 void wpa_conf_choose(GtkFileChooserButton *file_object)
 {
@@ -42,6 +43,7 @@ int files_paths_init(void)
         return -1;
     }
 
+    memset(files, 0, sizeof(files_paths));
     return 0;
 }
 

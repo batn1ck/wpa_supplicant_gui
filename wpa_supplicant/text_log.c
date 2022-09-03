@@ -4,12 +4,15 @@
 #include <pthread.h>
 #include <gtk/gtk.h>
 #include <sys/wait.h>
+#include "files_job.h"
 #include "text_log.h"
 #include "wpa_subprocess.h"
 
 static pthread_mutex_t wpa_thread_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_t wpa_read_tid, wpa_waitpid_tid;
-static pid_t wpa_supplicant_pid;
+pid_t wpa_supplicant_pid;
+
+extern files_paths *files;
 
 static void *wait_pid_thread(void *arg)
 {
@@ -26,7 +29,12 @@ static void *read_wpa_fd_out_thread(void *arg)
     GtkTextView *text_view;
     int wpa_out_fd, n_read_wpa_pid;
     char buf[BUFSIZ+1];
-    char *args[] = {"wpa_supplicant", "-i", "wlp3s0", "-c", "1.wpa", NULL};
+
+    if ( !files || !files->wpa_conf_file_path )
+        return NULL;
+
+    printf("%s\n", files->wpa_conf_file_path);
+    char *args[] = {"wpa_supplicant", "-i", "wlp3s0", "-c", files->wpa_conf_file_path, NULL};
 
     if ( pthread_mutex_trylock(&wpa_thread_mutex) != 0 )
         return NULL;
