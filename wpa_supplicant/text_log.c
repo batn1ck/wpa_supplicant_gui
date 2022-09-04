@@ -59,6 +59,10 @@ static void *read_wpa_fd_out_thread(void *arg)
     while ( (n_read_wpa_pid = read(wpa_out_fd, buf, BUFSIZ)) ) {
         buf[n_read_wpa_pid] = '\0';
         gtk_text_buffer_insert_at_cursor(text_buffer, (const gchar *)buf, (gint) -1);
+
+        if ( files->log_wpa_supp_fd > 0 )
+            write(files->log_wpa_supp_fd, buf, n_read_wpa_pid);
+
         //printf("%s", buf);
     }
 

@@ -2,8 +2,8 @@
 #define _FILES_JOB
 
 typedef struct {
-    char *log_wpa_supp_path;
-    char *log_scan_ap_path;
+    int log_wpa_supp_fd;
+    int log_scan_ap_fd;
     char *wpa_conf_file_path;
 } files_paths;
 
