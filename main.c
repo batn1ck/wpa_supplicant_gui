@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <semaphore.h>
 #include <unistd.h>
 #include <errno.h>
 #include "wpa_supplicant/files_job.h"
@@ -27,15 +26,35 @@ void close_app(GtkWidget *widget)
         wpa_supplicant_stop(wpa_supplicant_pid);
 }
 
+//void enable_static_net_settings_sensitive(GtkBuilder *builder)
+//{
+//    GtkWidget *window = GTK_WIDGET(gtk_builder_get_object(builder, ""));
+//}
+
+void show_net_settings(GtkMenuItem *settings, GtkBuilder *builder)
+{
+    if ( !settings || !builder )
+        return;
+
+    GtkWidget *window = GTK_WIDGET(gtk_builder_get_object(builder, "net_settings_window"));
+    //GtkWidget *ipv4_enable = GTK_WIDGET(gtk_builder_get_object(builder, "ipv4_enable"));
+    //gtk_widget_set_sensitive(ipv4_enable, FALSE);
+
+    gtk_window_set_title(GTK_WINDOW(window), "Network settings");
+    gtk_widget_show(GTK_WIDGET(window));
+}
+
 static void activate(GtkApplication *app, gpointer user_data)
 {
     GtkBuilder *builder;
     GtkWidget *window, *combo;
     GtkWidget *log_wpa_supp, *wpa_button_start, *wpa_button_stop, *wpa_button_log_clear;
+    GtkWidget *net_settings_tab;
 
     builder = gtk_builder_new_from_file("gui.ui");
 
     window = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
+    net_settings_tab = GTK_WIDGET(gtk_builder_get_object(builder, "net_settings_tab"));
     combo = GTK_WIDGET(gtk_builder_get_object(builder, "interfaces_combo"));
     log_wpa_supp = GTK_WIDGET(gtk_builder_get_object(builder, "wpa_supplicant_text_log"));
     wpa_button_start = GTK_WIDGET(gtk_builder_get_object(builder, "wpa_supplicant_start"));
@@ -46,7 +65,8 @@ static void activate(GtkApplication *app, gpointer user_data)
 
     gtk_window_set_title(GTK_WINDOW(window), "Wpa_supplicant");
     gtk_builder_connect_signals(builder, NULL);
-    g_signal_connect(window, "destroy", G_CALLBACK(close_app), NULL);
+    g_signal_connect(window, "destroy", G_CALLBACK(close_app), builder);
+    g_signal_connect(net_settings_tab, "activate", G_CALLBACK(show_net_settings), builder);
     g_signal_connect(combo, "changed", G_CALLBACK(iw_mac_label_show), builder);
     g_signal_connect(combo, "changed", G_CALLBACK(iw_mac_random_button_show), builder);
     g_signal_connect(wpa_button_start, "clicked", G_CALLBACK(wpa_log_widget_enable), log_wpa_supp);
