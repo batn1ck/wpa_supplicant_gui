@@ -15,7 +15,10 @@ compile_wpa:
 	$(CC) -c $(WPA_PATH)text_log.c -o text_log.o $(LIBS_FLAGS) $(CC_FLAGS)
 	$(CC) -c $(WPA_PATH)wpa_subprocess.c -o wpa_subprocess.o $(LIBS_FLAGS) $(CC_FLAGS)
 
-compile: compile_iw compile_wpa
+compile_net_settings_window:
+	$(CC) -c net_settings_window.c -o net_settings_window.o $(LIBS_FLAGS) $(CC_FLAGS)
+
+compile: compile_iw compile_wpa compile_net_settings_window
 	$(CC) *.o main.c -o main $(LIBS_FLAGS) $(CC_FLAGS)
 
 run:

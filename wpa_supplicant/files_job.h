@@ -1,5 +1,5 @@
-#ifndef _FILES_JOB
-#define _FILES_JOB
+#ifndef FILES_JOB_H
+#define FILES_JOB_H
 
 typedef struct {
     int log_wpa_supp_fd;

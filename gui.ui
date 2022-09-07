@@ -410,9 +410,9 @@
           <object class="GtkCheckButton" id="ipv4_enable">
             <property name="label" translatable="yes">IPv4</property>
             <property name="visible">True</property>
+            <property name="sensitive">False</property>
             <property name="can-focus">True</property>
             <property name="receives-default">False</property>
-            <property name="active">True</property>
             <property name="draw-indicator">True</property>
           </object>
           <packing>
@@ -425,8 +425,10 @@
             <property name="width-request">120</property>
             <property name="height-request">35</property>
             <property name="visible">True</property>
+            <property name="sensitive">False</property>
             <property name="can-focus">False</property>
             <property name="label" translatable="yes">IPv4 address:</property>
+            <property name="selectable">True</property>
           </object>
           <packing>
             <property name="x">61</property>
@@ -438,8 +440,10 @@
             <property name="width-request">120</property>
             <property name="height-request">35</property>
             <property name="visible">True</property>
+            <property name="sensitive">False</property>
             <property name="can-focus">False</property>
             <property name="label" translatable="yes">default gateway:</property>
+            <property name="selectable">True</property>
           </object>
           <packing>
             <property name="x">61</property>
@@ -451,8 +455,10 @@
             <property name="width-request">120</property>
             <property name="height-request">35</property>
             <property name="visible">True</property>
+            <property name="sensitive">False</property>
             <property name="can-focus">False</property>
             <property name="label" translatable="yes">dns-server:</property>
+            <property name="selectable">True</property>
           </object>
           <packing>
             <property name="x">61</property>
@@ -464,8 +470,10 @@
             <property name="width-request">120</property>
             <property name="height-request">35</property>
             <property name="visible">True</property>
+            <property name="sensitive">False</property>
             <property name="can-focus">False</property>
             <property name="label" translatable="yes">IPv6 address:</property>
+            <property name="selectable">True</property>
           </object>
           <packing>
             <property name="x">61</property>
@@ -477,6 +485,7 @@
             <property name="label" translatable="yes">IPv6</property>
             <property name="width-request">100</property>
             <property name="visible">True</property>
+            <property name="sensitive">False</property>
             <property name="can-focus">True</property>
             <property name="receives-default">False</property>
             <property name="draw-indicator">True</property>
@@ -491,8 +500,10 @@
             <property name="width-request">120</property>
             <property name="height-request">35</property>
             <property name="visible">True</property>
+            <property name="sensitive">False</property>
             <property name="can-focus">False</property>
             <property name="label" translatable="yes">default gateway:</property>
+            <property name="selectable">True</property>
           </object>
           <packing>
             <property name="x">61</property>
@@ -504,8 +515,10 @@
             <property name="width-request">120</property>
             <property name="height-request">35</property>
             <property name="visible">True</property>
+            <property name="sensitive">False</property>
             <property name="can-focus">False</property>
             <property name="label" translatable="yes">dns-server:</property>
+            <property name="selectable">True</property>
           </object>
           <packing>
             <property name="x">61</property>
@@ -513,11 +526,13 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="ipv4_address_entry">
+          <object class="GtkEntry" id="ipv4_address_entry_1">
             <property name="visible">True</property>
+            <property name="sensitive">False</property>
             <property name="can-focus">True</property>
-            <property name="max-length">15</property>
-            <property name="width-chars">15</property>
+            <property name="max-length">3</property>
+            <property name="width-chars">3</property>
+            <property name="input-purpose">number</property>
           </object>
           <packing>
             <property name="x">182</property>
@@ -525,11 +540,13 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="ipv4_gateway_entry">
+          <object class="GtkEntry" id="ipv4_gateway_entry_1">
             <property name="visible">True</property>
+            <property name="sensitive">False</property>
             <property name="can-focus">True</property>
-            <property name="max-length">15</property>
-            <property name="width-chars">15</property>
+            <property name="max-length">3</property>
+            <property name="width-chars">3</property>
+            <property name="input-purpose">number</property>
           </object>
           <packing>
             <property name="x">182</property>
@@ -537,11 +554,13 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="ipv4_dns_server_entry">
+          <object class="GtkEntry" id="ipv4_dns_server_entry_1">
             <property name="visible">True</property>
+            <property name="sensitive">False</property>
             <property name="can-focus">True</property>
-            <property name="max-length">15</property>
-            <property name="width-chars">15</property>
+            <property name="max-length">3</property>
+            <property name="width-chars">3</property>
+            <property name="input-purpose">number</property>
           </object>
           <packing>
             <property name="x">182</property>
@@ -551,6 +570,7 @@
         <child>
           <object class="GtkEntry" id="ipv6_address_entry">
             <property name="visible">True</property>
+            <property name="sensitive">False</property>
             <property name="can-focus">True</property>
           </object>
           <packing>
@@ -561,6 +581,7 @@
         <child>
           <object class="GtkEntry" id="ipv6_gateway_entry">
             <property name="visible">True</property>
+            <property name="sensitive">False</property>
             <property name="can-focus">True</property>
           </object>
           <packing>
@@ -571,8 +592,11 @@
         <child>
           <object class="GtkEntry" id="ipv6_address_netmask_entry">
             <property name="visible">True</property>
+            <property name="sensitive">False</property>
             <property name="can-focus">True</property>
+            <property name="max-length">3</property>
             <property name="width-chars">3</property>
+            <property name="placeholder-text" translatable="yes">64</property>
           </object>
           <packing>
             <property name="x">378</property>
@@ -582,6 +606,7 @@
         <child>
           <object class="GtkEntry" id="ipv6_dns_server_entry">
             <property name="visible">True</property>
+            <property name="sensitive">False</property>
             <property name="can-focus">True</property>
           </object>
           <packing>
@@ -603,39 +628,286 @@
         </child>
         <child>
           <object class="GtkLabel" id="ipv4_sep_label">
-            <property name="width-request">42</property>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="label" translatable="yes">/</property>
+            <property name="width-chars">1</property>
+            <property name="max-width-chars">1</property>
           </object>
           <packing>
-            <property name="x">335</property>
-            <property name="y">60</property>
+            <property name="x">410</property>
+            <property name="y">59</property>
           </packing>
         </child>
         <child>
           <object class="GtkEntry" id="ipv4_address_netmask_entry">
             <property name="visible">True</property>
+            <property name="sensitive">False</property>
             <property name="can-focus">True</property>
             <property name="max-length">2</property>
             <property name="width-chars">2</property>
+            <property name="placeholder-text" translatable="yes">24</property>
             <property name="input-purpose">number</property>
           </object>
           <packing>
-            <property name="x">374</property>
+            <property name="x">422</property>
             <property name="y">51</property>
           </packing>
         </child>
         <child>
           <object class="GtkLabel" id="ipv6_sep_label">
-            <property name="width-request">42</property>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="label" translatable="yes">/</property>
+            <property name="width-chars">1</property>
+            <property name="max-width-chars">1</property>
           </object>
           <packing>
-            <property name="x">343</property>
+            <property name="x">360</property>
             <property name="y">208</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="ipv4_address_entry_4">
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <property name="can-focus">True</property>
+            <property name="max-length">3</property>
+            <property name="width-chars">3</property>
+            <property name="input-purpose">number</property>
+          </object>
+          <packing>
+            <property name="x">362</property>
+            <property name="y">51</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="ipv4_address_entry_3">
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <property name="can-focus">True</property>
+            <property name="max-length">3</property>
+            <property name="width-chars">3</property>
+            <property name="input-purpose">number</property>
+          </object>
+          <packing>
+            <property name="x">302</property>
+            <property name="y">51</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="ipv4_address_entry_2">
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <property name="can-focus">True</property>
+            <property name="max-length">3</property>
+            <property name="width-chars">3</property>
+            <property name="input-purpose">number</property>
+          </object>
+          <packing>
+            <property name="x">242</property>
+            <property name="y">51</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="ipv4_dot1">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">.</property>
+            <property name="width-chars">1</property>
+            <property name="max-width-chars">1</property>
+          </object>
+          <packing>
+            <property name="x">230</property>
+            <property name="y">64</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="ipv4_dot2">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">.</property>
+            <property name="width-chars">1</property>
+            <property name="max-width-chars">1</property>
+          </object>
+          <packing>
+            <property name="x">290</property>
+            <property name="y">64</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="ipv4_dot3">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">.</property>
+            <property name="width-chars">1</property>
+            <property name="max-width-chars">1</property>
+          </object>
+          <packing>
+            <property name="x">350</property>
+            <property name="y">64</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="ipv4_gateway_entry_2">
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <property name="can-focus">True</property>
+            <property name="max-length">3</property>
+            <property name="width-chars">3</property>
+            <property name="input-purpose">number</property>
+          </object>
+          <packing>
+            <property name="x">242</property>
+            <property name="y">88</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="ipv4_gateway_entry_3">
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <property name="can-focus">True</property>
+            <property name="max-length">3</property>
+            <property name="width-chars">3</property>
+            <property name="input-purpose">number</property>
+          </object>
+          <packing>
+            <property name="x">302</property>
+            <property name="y">88</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="ipv4_gateway_entry_4">
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <property name="can-focus">True</property>
+            <property name="max-length">3</property>
+            <property name="width-chars">3</property>
+            <property name="input-purpose">number</property>
+          </object>
+          <packing>
+            <property name="x">362</property>
+            <property name="y">88</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="ipv4_gw_dot2">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">.</property>
+            <property name="width-chars">1</property>
+            <property name="max-width-chars">1</property>
+          </object>
+          <packing>
+            <property name="x">290</property>
+            <property name="y">101</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="ipv4_gw_dot3">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">.</property>
+            <property name="width-chars">1</property>
+            <property name="max-width-chars">1</property>
+          </object>
+          <packing>
+            <property name="x">350</property>
+            <property name="y">101</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="ipv4_gw_dot1">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">.</property>
+            <property name="width-chars">1</property>
+            <property name="max-width-chars">1</property>
+          </object>
+          <packing>
+            <property name="x">230</property>
+            <property name="y">101</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="ipv4_dns_server_entry_2">
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <property name="can-focus">True</property>
+            <property name="max-length">3</property>
+            <property name="width-chars">3</property>
+            <property name="input-purpose">number</property>
+          </object>
+          <packing>
+            <property name="x">242</property>
+            <property name="y">126</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="ipv4_dns_server_entry_3">
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <property name="can-focus">True</property>
+            <property name="max-length">3</property>
+            <property name="width-chars">3</property>
+            <property name="input-purpose">number</property>
+          </object>
+          <packing>
+            <property name="x">302</property>
+            <property name="y">126</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="ipv4_dns_server_entry_4">
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <property name="can-focus">True</property>
+            <property name="max-length">3</property>
+            <property name="width-chars">3</property>
+            <property name="input-purpose">number</property>
+          </object>
+          <packing>
+            <property name="x">362</property>
+            <property name="y">126</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="ipv4_dns_dot1">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">.</property>
+            <property name="width-chars">1</property>
+            <property name="max-width-chars">1</property>
+          </object>
+          <packing>
+            <property name="x">230</property>
+            <property name="y">139</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="ipv4_dns_dot3">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">.</property>
+            <property name="width-chars">1</property>
+            <property name="max-width-chars">1</property>
+          </object>
+          <packing>
+            <property name="x">350</property>
+            <property name="y">139</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="ipv4_dns_dot2">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">.</property>
+            <property name="width-chars">1</property>
+            <property name="max-width-chars">1</property>
+          </object>
+          <packing>
+            <property name="x">290</property>
+            <property name="y">139</property>
           </packing>
         </child>
       </object>
