@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stdint.h>
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,6 +8,7 @@
 #include <error.h>
 #include <errno.h>
 #include <ifaddrs.h>
+#include <arpa/inet.h>
 #include <net/if.h>
 #include <net/if_arp.h>
 #include <sys/ioctl.h>
@@ -155,7 +157,6 @@ int change_iw_mac_addr(char *if_name)
         return errno;
 
     srand(time(NULL));
-
     strncpy(ifr.ifr_name, if_name, IFNAMSIZ);
 
     if ( ioctl(fd, SIOCGIFFLAGS, &ifr) < 0 )
@@ -192,6 +193,63 @@ int change_iw_mac_addr(char *if_name)
 
     if ( ioctl(fd, SIOCSIFFLAGS, &ifr) < 0 )
         return errno;
+
+    return 0;
+}
+
+/*
+int change_iw_ipv4_address(char *if_name, struct sockaddr_in ipv4_info)
+{
+    struct ifreq ifr;
+    struct sockaddr_in *addr;
+    struct sockaddr_in *netmask;
+    int sock;
+
+    if ( !if_name )
+        return 1;
+
+    if ( (sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0 )
+        return errno;
+
+    addr = (struct sockaddr_in *) &ifr.ifr_addr;
+    netmask = (struct sockaddr_in *) &ifr.ifr_netmask;
+    strncpy(ifr.ifr_name, if_name, IFNAMSIZ);
+    ifr.ifr_addr.sa_family = AF_INET;
+
+    return 0;
+}
+*/
+
+int get_iw_ipv4_info(char *if_name, struct ipv4_settings *ipv4_info)
+{
+    struct ifreq ifr_ipv4_addr, ifr_ipv4_netmask;
+    struct sockaddr_in *addr, *netmask;
+    int sock;
+
+    if ( !if_name )
+        return 1;
+
+    if ( !ipv4_info )
+        return 2;
+
+    if ( (sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0 )
+        return errno;
+
+    strncpy(ifr_ipv4_addr.ifr_name, if_name, IFNAMSIZ);
+    strncpy(ifr_ipv4_netmask.ifr_name, if_name, IFNAMSIZ);
+    addr = (struct sockaddr_in *) &ifr_ipv4_addr.ifr_addr;
+    netmask = (struct sockaddr_in *) &ifr_ipv4_netmask.ifr_netmask;
+    ifr_ipv4_addr.ifr_addr.sa_family = AF_INET;
+    ifr_ipv4_netmask.ifr_netmask.sa_family = AF_INET;
+
+    if ( ioctl(sock, SIOCGIFADDR, &ifr_ipv4_addr) < 0 )
+        return 3;
+
+    if ( ioctl(sock, SIOCGIFNETMASK, &ifr_ipv4_netmask) < 0 )
+        return 4;
+
+    ipv4_info->ipv4_address.address = (uint32_t) addr->sin_addr.s_addr;
+    ipv4_info->ipv4_netmask.netmask = (uint32_t) netmask->sin_addr.s_addr;
 
     return 0;
 }

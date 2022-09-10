@@ -8,7 +8,6 @@
 #include "wpa_supplicant/files_job.h"
 #include "wpa_supplicant/text_log.h"
 #include "wpa_supplicant/wpa_subprocess.h"
-#include "iw/data_structure.h"
 #include "iw/iw_combobox.h"
 #include "iw/iw_mac_label.h"
 #include "iw/iw_mac_button.h"

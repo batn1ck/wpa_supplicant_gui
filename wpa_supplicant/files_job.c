@@ -24,7 +24,7 @@ void log_wpa_supp_choose(GtkFileChooserButton *file_object)
         return;
 
     char *log_wpa_supp_path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file_object));
-    printf("wpa supp log = %s\n", log_wpa_supp_path);
+    //printf("wpa supp log = %s\n", log_wpa_supp_path);
 
     if ( log_wpa_supp_path ) {
         files->log_wpa_supp_fd = open(log_wpa_supp_path, O_WRONLY | O_APPEND);

@@ -27,7 +27,7 @@ static void *read_wpa_fd_out_thread(void *arg)
 {
     GtkWidget *text = (GtkWidget *)arg;
     GtkTextBuffer *text_buffer;
-    GtkTextView *text_view;
+    //GtkTextView *text_view;
     int wpa_out_fd, n_read_wpa_pid;
     char buf[BUFSIZ+1];
 
