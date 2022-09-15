@@ -109,7 +109,7 @@ static void set_ipv4_settings_to_entry(GtkBuilder *builder)
     unsigned int i, netmask_bits_n;
     uint32_t netmask;
 
-    if ( !selected_iw ) // NEED ADD ALERT
+    if ( !selected_iw )
         return;
 
     if ( get_iw_ipv4_info(selected_iw, &ipv4_info) != 0 )
@@ -154,11 +154,32 @@ static void set_ipv4_settings_to_entry(GtkBuilder *builder)
 void show_net_settings_window(GtkMenuItem *settings)
 {
     GtkBuilder *builder = gtk_builder_new_from_file("gui.ui");
+    GtkWidget *window, *dialog;
+    GtkWidget *button_ok, *label_dialog, *content_dialog_area;
+    GtkDialogFlags flags;
+    gchar *message;
 
     if ( !settings || !builder )
         return;
 
-    GtkWidget *window = GTK_WIDGET(gtk_builder_get_object(builder, "net_settings_window"));
+    if ( !selected_iw ) {
+        message = "Please, select the interface";
+        dialog = gtk_dialog_new();
+        content_dialog_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+        gtk_dialog_response(GTK_DIALOG(dialog), GTK_RESPONSE_NONE);
+        gtk_window_set_title(GTK_WINDOW(dialog), "The interface is not selected");
+        button_ok = gtk_button_new_with_label("OK");
+
+        gtk_widget_set_halign(button_ok, GTK_ALIGN_CENTER);
+        label_dialog = gtk_label_new(message);
+        g_signal_connect_swapped(button_ok, "clicked", G_CALLBACK(gtk_widget_destroy), dialog);
+        gtk_container_add(GTK_CONTAINER(content_dialog_area), label_dialog);
+        gtk_container_add(GTK_CONTAINER(content_dialog_area), button_ok);
+        gtk_widget_show_all(dialog);
+        return;
+    }
+
+    window = GTK_WIDGET(gtk_builder_get_object(builder, "net_settings_window"));
     GtkWidget *static_ip_radio = GTK_WIDGET(gtk_builder_get_object(builder, "static_ip_settings_radio"));
     GtkWidget *dhcp_radio = GTK_WIDGET(gtk_builder_get_object(builder, "dhcp_radio"));
     GtkWidget *ipv4_enable = GTK_WIDGET(gtk_builder_get_object(builder, "ipv4_enable"));

@@ -32,8 +32,6 @@ void log_wpa_supp_choose(GtkFileChooserButton *file_object)
         if ( files->log_wpa_supp_fd < 0 )
             return;
     }
-
-    //files->log_wpa_supp_fd = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file_object));
 }
 
 void log_ap_scan_choose(GtkFileChooserButton *file_object)
