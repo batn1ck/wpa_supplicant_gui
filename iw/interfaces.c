@@ -1,6 +1,7 @@
+#include <endian.h>
+#include <time.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -148,7 +149,7 @@ int change_iw_mac_addr(char *if_name)
 {
     struct ifreq ifr;
     short backup_flags;
-    int fd;
+    int fd, temp_errno;
 
     if ( !if_name )
         return 1;
@@ -159,14 +160,20 @@ int change_iw_mac_addr(char *if_name)
     srand(time(NULL));
     strncpy(ifr.ifr_name, if_name, IFNAMSIZ);
 
-    if ( ioctl(fd, SIOCGIFFLAGS, &ifr) < 0 )
-        return errno;
+    if ( ioctl(fd, SIOCGIFFLAGS, &ifr) < 0 ) {
+        temp_errno = errno;
+        close(fd);
+        return temp_errno;
+    }
 
     backup_flags = ifr.ifr_flags;
     ifr.ifr_flags &= ~IFF_UP;
 
-    if ( ioctl(fd, SIOCSIFFLAGS, &ifr) < 0 )
-        return errno;
+    if ( ioctl(fd, SIOCSIFFLAGS, &ifr) < 0 ) {
+        temp_errno = errno;
+        close(fd);
+        return temp_errno;
+    }
 
     ifr.ifr_hwaddr.sa_data[0] = rand() % 256;
     ifr.ifr_hwaddr.sa_data[1] = rand() % 256;
@@ -177,6 +184,7 @@ int change_iw_mac_addr(char *if_name)
     ifr.ifr_hwaddr.sa_family = ARPHRD_ETHER;
 
     if ( ioctl(fd, SIOCSIFHWADDR, &ifr) < 0 ) {
+        temp_errno = errno;
         fprintf(stderr, "ioctl: %s: %.2x:%.2x:%.2x:%.2x:%.2x:%.2x\n", strerror(errno),
     ifr.ifr_hwaddr.sa_data[0],
     ifr.ifr_hwaddr.sa_data[1],
@@ -185,46 +193,131 @@ int change_iw_mac_addr(char *if_name)
     ifr.ifr_hwaddr.sa_data[4],
     ifr.ifr_hwaddr.sa_data[5]
                 );
-        return errno;
+        close(fd);
+        return temp_errno;
     }
 
     backup_flags |= IFF_UP;
     ifr.ifr_flags = backup_flags;
 
-    if ( ioctl(fd, SIOCSIFFLAGS, &ifr) < 0 )
-        return errno;
+    if ( ioctl(fd, SIOCSIFFLAGS, &ifr) < 0 ) {
+        temp_errno = errno;
+        close(fd);
+        return temp_errno;
+    }
 
+    close(fd);
     return 0;
 }
 
-/*
-int change_iw_ipv4_address(char *if_name, struct sockaddr_in ipv4_info)
+int set_iw_ipv4_addr(char *if_name, struct ipv4_settings ipv4_info)
 {
     struct ifreq ifr;
     struct sockaddr_in *addr;
     struct sockaddr_in *netmask;
-    int sock;
+    int fd, temp_errno;
+    short backup_flags;
+    char ipv4_addr_str[IPv4_ADDR_STR_LEN], ipv4_netmask_str[IPv4_ADDR_STR_LEN];
 
     if ( !if_name )
-        return 1;
+        return -1;
 
-    if ( (sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0 )
+    if ( (fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 )
         return errno;
 
+    strncpy(ifr.ifr_name, if_name, IFNAMSIZ);
+    ifr.ifr_addr.sa_family = AF_INET;
+
+    if ( ioctl(fd, SIOCGIFFLAGS, &ifr) < 0 ) {
+        temp_errno = errno;
+        close(fd);
+        return temp_errno;
+    }
+
+    backup_flags = ifr.ifr_flags;
+    ifr.ifr_flags &= ~IFF_UP;
+
+    if ( ioctl(fd, SIOCSIFFLAGS, &ifr) < 0 ) {
+        temp_errno = errno;
+        close(fd);
+        return temp_errno;
+    }
+
+    //ipv4_info.ipv4_address.address = htonl(ipv4_info.ipv4_address.address);
+
+    if ( !(ipv4_info.ipv4_netmask.octets[0] & 1) )
+        ipv4_info.ipv4_netmask.netmask = htonl(ipv4_info.ipv4_netmask.netmask);
+
+    snprintf(ipv4_addr_str, IPv4_ADDR_STR_LEN, "%hhu.%hhu.%hhu.%hhu",
+             ipv4_info.ipv4_address.octets[0],
+             ipv4_info.ipv4_address.octets[1],
+             ipv4_info.ipv4_address.octets[2],
+             ipv4_info.ipv4_address.octets[3]
+             );
+
+    snprintf(ipv4_netmask_str, IPv4_ADDR_STR_LEN, "%hhu.%hhu.%hhu.%hhu",
+             ipv4_info.ipv4_netmask.octets[0],
+             ipv4_info.ipv4_netmask.octets[1],
+             ipv4_info.ipv4_netmask.octets[2],
+             ipv4_info.ipv4_netmask.octets[3]
+             );
+
     addr = (struct sockaddr_in *) &ifr.ifr_addr;
+    strncpy(ifr.ifr_name, if_name, IFNAMSIZ);
+    ifr.ifr_addr.sa_family = AF_INET;
+
+    if ( inet_pton(AF_INET, ipv4_addr_str, &addr->sin_addr) < 1 ) {
+        temp_errno = errno;
+        close(fd);
+        return temp_errno;
+    }
+
+    if ( ioctl(fd, SIOCSIFADDR, &ifr) < 0 ) {
+        temp_errno = errno;
+        close(fd);
+        return temp_errno;
+    }
+
     netmask = (struct sockaddr_in *) &ifr.ifr_netmask;
     strncpy(ifr.ifr_name, if_name, IFNAMSIZ);
     ifr.ifr_addr.sa_family = AF_INET;
 
+    if ( inet_pton(AF_INET, ipv4_netmask_str, &netmask->sin_addr) < 1 ) {
+        temp_errno = errno;
+        close(fd);
+        return temp_errno;
+    }
+
+    if ( ioctl(fd, SIOCSIFNETMASK, &ifr) < 0 ) {
+        temp_errno = errno;
+        close(fd);
+        return temp_errno;
+    }
+
+    if ( ioctl(fd, SIOCGIFFLAGS, &ifr) < 0 ) {
+        temp_errno = errno;
+        close(fd);
+        return temp_errno;
+    }
+
+    strncpy(ifr.ifr_name, if_name, IFNAMSIZ);
+    ifr.ifr_flags = backup_flags;
+    ifr.ifr_flags |= IFF_UP;
+
+    if ( ioctl(fd, SIOCSIFFLAGS, &ifr) < 0 ) {
+        close(fd);
+        return errno;
+    }
+
+    close(fd);
     return 0;
 }
-*/
 
 int get_iw_ipv4_info(char *if_name, struct ipv4_settings *ipv4_info)
 {
     struct ifreq ifr_ipv4_addr, ifr_ipv4_netmask;
     struct sockaddr_in *addr, *netmask;
-    int sock;
+    int fd, temp_errno;
 
     if ( !if_name )
         return 1;
@@ -232,7 +325,7 @@ int get_iw_ipv4_info(char *if_name, struct ipv4_settings *ipv4_info)
     if ( !ipv4_info )
         return 2;
 
-    if ( (sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0 )
+    if ( (fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 )
         return errno;
 
     strncpy(ifr_ipv4_addr.ifr_name, if_name, IFNAMSIZ);
@@ -242,14 +335,21 @@ int get_iw_ipv4_info(char *if_name, struct ipv4_settings *ipv4_info)
     ifr_ipv4_addr.ifr_addr.sa_family = AF_INET;
     ifr_ipv4_netmask.ifr_netmask.sa_family = AF_INET;
 
-    if ( ioctl(sock, SIOCGIFADDR, &ifr_ipv4_addr) < 0 )
-        return 3;
+    if ( ioctl(fd, SIOCGIFADDR, &ifr_ipv4_addr) < 0 ) {
+        temp_errno = errno;
+        close(fd);
+        return temp_errno;
+    }
 
-    if ( ioctl(sock, SIOCGIFNETMASK, &ifr_ipv4_netmask) < 0 )
-        return 4;
+    if ( ioctl(fd, SIOCGIFNETMASK, &ifr_ipv4_netmask) < 0 ) {
+        temp_errno = errno;
+        close(fd);
+        return temp_errno;
+    }
 
     ipv4_info->ipv4_address.address = (uint32_t) addr->sin_addr.s_addr;
     ipv4_info->ipv4_netmask.netmask = (uint32_t) netmask->sin_addr.s_addr;
+    close(fd);
 
     return 0;
 }

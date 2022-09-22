@@ -1,4 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <arpa/inet.h>
 #include <gtk/gtk.h>
@@ -6,6 +9,30 @@
 #include "iw/interfaces.h"
 
 extern char *selected_iw;
+
+static void show_alert(gchar *title_text,
+                       gchar *body_label_text,
+                       gchar *button_text)
+{
+    GtkWidget *dialog;
+    GtkWidget *button_ok, *label_dialog, *content_dialog_area;
+
+    if ( !title_text || !body_label_text || !button_text )
+        return;
+
+    dialog = gtk_dialog_new();
+    content_dialog_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    gtk_dialog_response(GTK_DIALOG(dialog), GTK_RESPONSE_NONE);
+    gtk_window_set_title(GTK_WINDOW(dialog), title_text);
+    button_ok = gtk_button_new_with_label(button_text);
+
+    gtk_widget_set_halign(button_ok, GTK_ALIGN_CENTER);
+    label_dialog = gtk_label_new(body_label_text);
+    g_signal_connect_swapped(button_ok, "clicked", G_CALLBACK(gtk_widget_destroy), dialog);
+    gtk_container_add(GTK_CONTAINER(content_dialog_area), label_dialog);
+    gtk_container_add(GTK_CONTAINER(content_dialog_area), button_ok);
+    gtk_widget_show_all(dialog);
+}
 
 static void set_ipv4_settings_sensitive(GtkBuilder *builder, gboolean status)
 {
@@ -120,11 +147,11 @@ static void set_ipv4_settings_to_entry(GtkBuilder *builder)
 
     for (i = 0; i < IPv4_WIDGETS_N; i++) {
         snprintf(addr_widget_name, WIDGET_NAME_LEN, "ipv4_address_entry_%u", i+1);
-        snprintf(ipv4_addr_octet_i, 4, "%u", (unsigned char) ipv4_info.ipv4_address.octets[i]);
+        snprintf(ipv4_addr_octet_i, 4, "%hhu", ipv4_info.ipv4_address.octets[i]);
 
         ipv4_entry_widget = GTK_WIDGET(gtk_builder_get_object(builder, addr_widget_name));
 
-        gtk_entry_set_text((GtkEntry *) ipv4_entry_widget, ipv4_addr_octet_i);
+        gtk_entry_set_text(GTK_ENTRY(ipv4_entry_widget), ipv4_addr_octet_i);
     }
 
     netmask = htonl(ipv4_info.ipv4_netmask.netmask);
@@ -135,47 +162,168 @@ static void set_ipv4_settings_to_entry(GtkBuilder *builder)
         netmask <<= 1;
     }
 
-    //printf("bits: %u\n", netmask_bits_n);
     snprintf(netmask_str, 3, "%u", netmask_bits_n);
-    gtk_entry_set_text((GtkEntry *) netmask_entry_widget, netmask_str);
+    gtk_entry_set_text(GTK_ENTRY(netmask_entry_widget), netmask_str);
+}
 
-    //printf("ADDRESS = %u %u %u %u\n", 
-    //       (unsigned char) ipv4_info.ipv4_address.octets[0],
-    //       (unsigned char) ipv4_info.ipv4_address.octets[1],
-    //       (unsigned char) ipv4_info.ipv4_address.octets[2],
-    //       (unsigned char) ipv4_info.ipv4_address.octets[3]);
-    //printf("NETMASK = %u %u %u %u\n",
-    //       (unsigned char) ipv4_info.ipv4_netmask.octets[0],
-    //       (unsigned char) ipv4_info.ipv4_netmask.octets[1],
-    //       (unsigned char) ipv4_info.ipv4_netmask.octets[2],
-    //       (unsigned char) ipv4_info.ipv4_netmask.octets[3]);
+static int get_ipv4_settings_from_widgets(GtkBuilder *builder,
+                             struct ipv4_settings *ip_addr_settings,
+                             char *ip_gateway,
+                             char *ip_dns)
+{
+    unsigned int i = 31;
+    bool addr_set = true, gateway_set = true, dns_set = true;
+    int addr_i, gateway_i, dns_i, netmask_bits;
+    char addr_widget_name[WIDGET_NAME_LEN], gateway_widget_name[WIDGET_NAME_LEN], dns_widget_name[WIDGET_NAME_LEN];
+    char *addr_entry_res, *gateway_entry_res, *dns_entry_res, *netmask_entry_res;
+    GtkWidget *addr_entry_widget, *gateway_entry_widget, *dns_entry_widget, *netmask_entry_widget;
+
+    if ( !builder )
+        return -1;
+
+    if ( !ip_addr_settings )
+        return -2;
+
+    if ( !ip_gateway )
+        return -3;
+
+    if ( !ip_dns )
+        return -4;
+
+    memset(ip_addr_settings, 0, sizeof(struct ipv4_settings));
+    netmask_entry_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ipv4_address_netmask_entry"));
+    netmask_entry_res = (char *) gtk_entry_get_text(GTK_ENTRY(netmask_entry_widget));
+    netmask_bits = atoi(netmask_entry_res);
+
+    if ( !netmask_bits || netmask_bits < 1 || netmask_bits > 31 )
+        netmask_bits = 24;
+
+    while ( netmask_bits ) {
+        ip_addr_settings->ipv4_netmask.netmask |= 1 << i;
+        netmask_bits--;
+        i--;
+    }
+
+    for (i = 0; i < IPv4_WIDGETS_N; i++) {
+        snprintf(addr_widget_name, WIDGET_NAME_LEN, "ipv4_address_entry_%u", i+1);
+        snprintf(gateway_widget_name, WIDGET_NAME_LEN, "ipv4_gateway_entry_%u", i+1);
+        snprintf(dns_widget_name, WIDGET_NAME_LEN, "ipv4_dns_server_entry_%u", i+1);
+
+        addr_entry_widget = GTK_WIDGET(gtk_builder_get_object(builder, addr_widget_name));
+        gateway_entry_widget = GTK_WIDGET(gtk_builder_get_object(builder, gateway_widget_name));
+        dns_entry_widget = GTK_WIDGET(gtk_builder_get_object(builder, dns_widget_name));
+
+        addr_entry_res = (char *) gtk_entry_get_text(GTK_ENTRY(addr_entry_widget));
+        gateway_entry_res = (char *) gtk_entry_get_text(GTK_ENTRY(gateway_entry_widget));
+        dns_entry_res = (char *) gtk_entry_get_text(GTK_ENTRY(dns_entry_widget));
+
+        if ( *addr_entry_res == '\0' )
+            addr_set = false;
+
+        if ( *gateway_entry_res == '\0' )
+            gateway_set = false;
+
+        if ( *dns_entry_res == '\0' )
+            dns_set = false;
+
+        addr_i = atoi(addr_entry_res);
+        gateway_i = atoi(gateway_entry_res);
+        dns_i = atoi(dns_entry_res);
+
+        if ( i == 0 ) {
+            if ( addr_i < 1 )
+                addr_set = false;
+
+            if ( gateway_i < 1 )
+                gateway_set = false;
+
+            if ( dns_i < 1 )
+                gateway_set = false;
+        }
+
+        if ( addr_i >= 0 && addr_i <= 255 ) {
+            //ipv4_addr[i] = addr_i;
+            ip_addr_settings->ipv4_address.octets[i] = addr_i;
+        }
+        else
+            addr_set = false;
+
+        if ( gateway_i >= 0 && gateway_i <= 255 )
+            ip_gateway[i] = gateway_i;
+        else
+            gateway_set = false;
+
+        if ( dns_i >= 0 && dns_i <= 255 )
+            ip_dns[i] = dns_i;
+        else
+            dns_set = false;
+
+        //printf("%d %d %d\n", addr_i, gateway_i, dns_i);
+        //printf("abc %s\n", gtk_entry_get_text(GTK_ENTRY(gateway_entry_widget)));
+    }
+
+    if ( !addr_set )
+        ip_addr_settings = NULL;
+
+    if ( !gateway_set )
+        ip_gateway = NULL;
+
+    if ( !dns_set )
+        ip_dns = NULL;
+
+    return 0;
+}
+
+static int apply_all_settings(GtkWidget *widget, GtkBuilder *builder)
+{
+    char ipv4_gateway[4], ipv4_dns[4];
+    struct ipv4_settings ipv4_addr_info;
+    gchar error_buf[ERROR_BUFFER_LEN];
+    int ret;
+
+    if ( !builder )
+        return -1;
+
+    if ( (ret = get_ipv4_settings_from_widgets(builder,
+                           &ipv4_addr_info,
+                           ipv4_gateway,
+                           ipv4_dns
+                           )) < 0 ) {
+        snprintf(error_buf, ERROR_BUFFER_LEN,
+                 "Cannot get IPv4 settings. Code: %d",
+                 ret);
+        show_alert("Error IPv4",
+                   error_buf,
+                   "OK");
+        return -2;
+    }
+
+    if ( (ret = set_iw_ipv4_addr(selected_iw, ipv4_addr_info)) != 0 ) {
+        snprintf(error_buf, ERROR_BUFFER_LEN,
+                 "Cannot set IPv4 settings. Code: %d\n%s",
+                 ret, strerror(ret));
+        show_alert("Error IPv4",
+                   error_buf,
+                   "OK");
+        return -3;
+    }
+
+    // Add set ipv6 settings
+    return 0;
 }
 
 void show_net_settings_window(GtkMenuItem *settings)
 {
     GtkBuilder *builder = gtk_builder_new_from_file("gui.ui");
-    GtkWidget *window, *dialog;
-    GtkWidget *button_ok, *label_dialog, *content_dialog_area;
-    GtkDialogFlags flags;
-    gchar *message;
+    GtkWidget *window;
 
     if ( !settings || !builder )
         return;
 
-    if ( !selected_iw ) {
-        message = "Please, select the interface";
-        dialog = gtk_dialog_new();
-        content_dialog_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
-        gtk_dialog_response(GTK_DIALOG(dialog), GTK_RESPONSE_NONE);
-        gtk_window_set_title(GTK_WINDOW(dialog), "The interface is not selected");
-        button_ok = gtk_button_new_with_label("OK");
+    gtk_builder_connect_signals(builder, NULL);
 
-        gtk_widget_set_halign(button_ok, GTK_ALIGN_CENTER);
-        label_dialog = gtk_label_new(message);
-        g_signal_connect_swapped(button_ok, "clicked", G_CALLBACK(gtk_widget_destroy), dialog);
-        gtk_container_add(GTK_CONTAINER(content_dialog_area), label_dialog);
-        gtk_container_add(GTK_CONTAINER(content_dialog_area), button_ok);
-        gtk_widget_show_all(dialog);
+    if ( !selected_iw ) {
+        show_alert("The interface is not selected", "Please, select the interface", "OK");
         return;
     }
 
@@ -184,8 +332,10 @@ void show_net_settings_window(GtkMenuItem *settings)
     GtkWidget *dhcp_radio = GTK_WIDGET(gtk_builder_get_object(builder, "dhcp_radio"));
     GtkWidget *ipv4_enable = GTK_WIDGET(gtk_builder_get_object(builder, "ipv4_enable"));
     GtkWidget *ipv6_enable = GTK_WIDGET(gtk_builder_get_object(builder, "ipv6_enable"));
+    GtkWidget *save_button = GTK_WIDGET(gtk_builder_get_object(builder, "apply_net_settings_button"));
     set_ipv4_settings_to_entry(builder);
 
+    g_signal_connect(save_button, "clicked", G_CALLBACK(apply_all_settings), builder);
     g_signal_connect(static_ip_radio, "toggled", G_CALLBACK(enable_static_net_settings_sensitive), builder);
     g_signal_connect(dhcp_radio, "toggled", G_CALLBACK(disable_static_net_settings_sensitive), builder);
     g_signal_connect(ipv4_enable, "toggled", G_CALLBACK(enable_ipv4_settings), builder);
