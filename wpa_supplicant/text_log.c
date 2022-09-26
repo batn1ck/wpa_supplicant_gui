@@ -15,6 +15,8 @@ pid_t wpa_supplicant_pid;
 extern files_paths *files;
 extern char *selected_iw;
 
+extern void show_alert(gchar *, gchar *, gchar *);
+
 static void *wait_pid_thread(void *arg)
 {
     waitpid(wpa_supplicant_pid, NULL, 0);
@@ -25,7 +27,7 @@ static void *wait_pid_thread(void *arg)
 
 static void *read_wpa_fd_out_thread(void *arg)
 {
-    GtkWidget *text = (GtkWidget *)arg;
+    GtkWidget *text = GTK_WIDGET(arg);
     GtkTextBuffer *text_buffer;
     //GtkTextView *text_view;
     int wpa_out_fd, n_read_wpa_pid;
@@ -72,7 +74,25 @@ static void *read_wpa_fd_out_thread(void *arg)
 
 void wpa_log_widget_enable(GtkWidget *widget, GtkWidget *text)
 {
+    if ( !selected_iw ) {
+        show_alert("The interface is not selected",
+                   "Please, select the network interface",
+                   "OK"
+        );
+        return;
+    }
+
+    if ( !files || !files->wpa_conf_file_path ) {
+        show_alert("Wpa.conf is not selected",
+                   "Please, select the wpa.conf file",
+                   "OK"
+        );
+        return;
+    }
+
+    //g_thread_new("thread", thr_func, text);
     pthread_create(&wpa_read_tid, NULL, read_wpa_fd_out_thread, (void *)text);
+    //gdk_threads_add_idle(read_wpa_fd_out_thread, text);
 }
 
 void wpa_log_widget_disable(GtkWidget *widget)

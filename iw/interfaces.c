@@ -216,7 +216,6 @@ int set_iw_ipv4_addr(char *if_name, struct ipv4_settings ipv4_info)
     struct sockaddr_in *addr;
     struct sockaddr_in *netmask;
     int fd, temp_errno;
-    short backup_flags;
     char ipv4_addr_str[IPv4_ADDR_STR_LEN], ipv4_netmask_str[IPv4_ADDR_STR_LEN];
 
     if ( !if_name )
@@ -227,21 +226,6 @@ int set_iw_ipv4_addr(char *if_name, struct ipv4_settings ipv4_info)
 
     strncpy(ifr.ifr_name, if_name, IFNAMSIZ);
     ifr.ifr_addr.sa_family = AF_INET;
-
-    if ( ioctl(fd, SIOCGIFFLAGS, &ifr) < 0 ) {
-        temp_errno = errno;
-        close(fd);
-        return temp_errno;
-    }
-
-    backup_flags = ifr.ifr_flags;
-    ifr.ifr_flags &= ~IFF_UP;
-
-    if ( ioctl(fd, SIOCSIFFLAGS, &ifr) < 0 ) {
-        temp_errno = errno;
-        close(fd);
-        return temp_errno;
-    }
 
     //ipv4_info.ipv4_address.address = htonl(ipv4_info.ipv4_address.address);
 
@@ -279,8 +263,8 @@ int set_iw_ipv4_addr(char *if_name, struct ipv4_settings ipv4_info)
     }
 
     netmask = (struct sockaddr_in *) &ifr.ifr_netmask;
-    strncpy(ifr.ifr_name, if_name, IFNAMSIZ);
-    ifr.ifr_addr.sa_family = AF_INET;
+    //strncpy(ifr.ifr_name, if_name, IFNAMSIZ);
+    //ifr.ifr_addr.sa_family = AF_INET;
 
     if ( inet_pton(AF_INET, ipv4_netmask_str, &netmask->sin_addr) < 1 ) {
         temp_errno = errno;
@@ -301,8 +285,7 @@ int set_iw_ipv4_addr(char *if_name, struct ipv4_settings ipv4_info)
     }
 
     strncpy(ifr.ifr_name, if_name, IFNAMSIZ);
-    ifr.ifr_flags = backup_flags;
-    ifr.ifr_flags |= IFF_UP;
+    ifr.ifr_flags |= (IFF_UP | IFF_RUNNING);
 
     if ( ioctl(fd, SIOCSIFFLAGS, &ifr) < 0 ) {
         close(fd);

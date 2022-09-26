@@ -18,7 +18,10 @@ compile_wpa:
 compile_net_settings_window:
 	$(CC) -c net_settings_window.c -o net_settings_window.o $(LIBS_FLAGS) $(CC_FLAGS)
 
-compile: compile_iw compile_wpa compile_net_settings_window
+compile_gui_alert:
+	$(CC) -c gui_alert.c -o gui_alert.o $(LIBS_FLAGS) $(CC_FLAGS)
+
+compile: compile_iw compile_wpa compile_net_settings_window compile_gui_alert
 	$(CC) *.o main.c -o main $(LIBS_FLAGS) $(CC_FLAGS)
 
 run:
@@ -27,9 +30,11 @@ run:
 run_sudo:
 	gksudo ./main
 
-default: compile_iw compile_wpa compile
+default: compile
 
 build: default run
+
+build_root: compile run_sudo
 
 clean:
 	rm -f *.o
